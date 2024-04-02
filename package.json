@@ -30,7 +30,7 @@
     "morgan": "^1.10.0",
     "mqtt": "^4.3.7",
     "mybatis-mapper": "^0.7.0",
-    "presto-client": "^0.12.2",
+    "odbc": "^2.4.8",
     "swagger-jsdoc": "^6.2.1",
     "swagger-ui-express": "^4.5.0",
     "winston": "^3.8.1",

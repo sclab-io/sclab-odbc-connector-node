@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { QueryItem, PrestoClient, SQL_INJECTION } from '../config/index';
+import { QueryItem, DBPool, SQL_INJECTION } from '../config/index';
 import { logger } from '@/utils/logger';
 import { getPlaceHolders, hasSql, replaceString } from '@/utils/util';
 
@@ -67,64 +67,9 @@ class APIController {
     }
 
     logger.info(`RUN SQL : ${sql}`);
-    PrestoClient.execute({
-      query: sql,
-      state: function (error, query_id, stats) {
-        if (error) {
-          console.error(error);
-          next(error);
-          return;
-        }
-        logger.debug({ message: 'status changed', id: query_id, stats: stats });
-      },
-      columns: function (error, data) {
-        if (error) {
-          console.error(error);
-          next(error);
-          return;
-        }
-        logger.debug(data);
-      },
-      data: function (error, data, columns, stats) {
-        if (error) {
-          console.error(error);
-          next(error);
-          return;
-        }
-        logger.debug(data);
-        for (let i = 0; i < data.length; i++) {
-          const obj = {};
-          for (let j = 0; j < columns.length; j++) {
-            obj[columns[j].name] = data[i][j];
-          }
-
-          rows.push(obj);
-        }
-      },
-      success: function (error, stats) {
-        if (error) {
-          console.error(error);
-          next(error);
-          return;
-        }
-        logger.debug(stats);
-        res.writeHead(200, {
-          'Content-Type': 'application/json',
-        });
-        res.end(
-          JSON.stringify({
-            rows,
-          }),
-        );
-
-        rows = null;
-      },
-      error: function (error) {
-        console.error(error);
-        rows = null;
-        next(error);
-      },
-    });
+    const conn = await DBPool();
+    const result = await conn.query(sql);
+    console.log(result);
   };
 }
 

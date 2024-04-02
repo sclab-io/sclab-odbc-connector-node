@@ -14,13 +14,6 @@ import {
   LOG_FORMAT,
   ORIGIN,
   CREDENTIALS,
-  PRESTO_HOST,
-  PRESTO_PORT,
-  PRESTO_USER,
-  PRESTO_AUTH,
-  PRESTO_BASIC_USER,
-  PRESTO_BASIC_PASSWORD,
-  PRESTO_CUSTOM_AUTH,
   MQTT_TOPIC,
   MQTT_HOST,
   MQTT_CLIENT_ID,
@@ -30,9 +23,10 @@ import {
   SECRET_KEY,
   JWT_PRIVATE_KEY_PATH,
   LOG_DIR,
-  PrestoClient,
+  DBPool,
   SQL_INJECTION,
   MY_BATIS_FILE_FOLDER,
+  CONNECTION_STRING,
 } from '@config';
 import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
@@ -93,23 +87,11 @@ class App {
     MybatisMapper.createMapper(files);
   }
 
-  public checkConnectionInformation() {
+  public async checkConnectionInformation() {
     // check connection
     try {
-      PrestoClient.execute({
-        query: 'select 1',
-        success: function (error: any, stats: any) {
-          if (error) {
-            return;
-          }
-          logger.info('Presto/Trino connection success');
-        },
-        error: (error: any) => {
-          console.error(error);
-          logger.info(`Cannot connect to Presto/Trino. Please check your .env.${this.env}.local file.`);
-          process.exit();
-        },
-      });
+      const conn = await DBPool();
+      logger.info('DB Connection success');
     } catch (e) {
       console.error(e);
     }
@@ -154,13 +136,7 @@ class App {
     this.app.listen(this.port, () => {
       logger.info(`NODE ENV: ${this.env}`);
       logger.info(`LOG_DIR: ${LOG_DIR}`);
-      logger.info(`PRESTO_HOST: ${PRESTO_HOST}`);
-      logger.info(`PRESTO_PORT: ${PRESTO_PORT}`);
-      logger.info(`PRESTO_USER: ${PRESTO_USER}`);
-      logger.info(`PRESTO_AUTH: ${PRESTO_AUTH}`);
-      logger.info(`PRESTO_BASIC_USER: ${PRESTO_BASIC_USER}`);
-      logger.info(`PRESTO_BASIC_PASSWORD: ${PRESTO_BASIC_PASSWORD}`);
-      logger.info(`PRESTO_CUSTOM_AUTH: ${PRESTO_CUSTOM_AUTH}`);
+      logger.info(`CONNECTION_STRING: ${CONNECTION_STRING}`);
       logger.info(`MQTT_TOPIC: ${MQTT_TOPIC}`);
       logger.info(`MQTT_HOST: ${MQTT_HOST}`);
       logger.info(`MQTT_CLIENT_ID: ${MQTT_CLIENT_ID}`);

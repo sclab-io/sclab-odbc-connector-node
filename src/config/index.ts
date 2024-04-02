@@ -1,6 +1,6 @@
 import { logger } from '@/utils/logger';
 import { config } from 'dotenv';
-import presto from 'presto-client';
+import odbc, { Pool } from 'odbc';
 
 config({ path: `.env.${process.env.NODE_ENV || 'development'}.local` });
 
@@ -14,13 +14,7 @@ export const {
   LOG_FORMAT,
   LOG_DIR,
   ORIGIN,
-  PRESTO_HOST,
-  PRESTO_PORT,
-  PRESTO_USER,
-  PRESTO_AUTH,
-  PRESTO_BASIC_USER,
-  PRESTO_BASIC_PASSWORD,
-  PRESTO_CUSTOM_AUTH,
+  CONNECTION_STRING,
   INTERVAL_MS,
   MQTT_TOPIC,
   MQTT_HOST,
@@ -86,29 +80,6 @@ Object.keys(process.env).forEach(function (key) {
   QueryItems.push(queryItem);
 });
 
-// BigInt bug fix to string
-BigInt.prototype['toJSON'] = function () {
-  if (this > Number.MAX_SAFE_INTEGER) {
-    return this.toString();
-  }
-  return parseInt(this.toString(), 10);
-};
-
-let prestoOptions: any = {
-  host: PRESTO_HOST,
-  port: PRESTO_PORT,
-  user: PRESTO_USER,
-};
-
-if (PRESTO_AUTH) {
-  if (PRESTO_AUTH.toUpperCase() === 'BASIC') {
-    prestoOptions.basic_auth = {
-      user: PRESTO_BASIC_USER,
-      password: PRESTO_BASIC_PASSWORD || '',
-    };
-  } else if (PRESTO_AUTH.toUpperCase() === 'CUSTOM') {
-    prestoOptions.custom_auth = PRESTO_CUSTOM_AUTH || '';
-  }
+export async function DBPool(): Promise<Pool> {
+  return await odbc.pool(`${CONNECTION_STRING}`);
 }
-
-export const PrestoClient = new presto.Client(prestoOptions);
