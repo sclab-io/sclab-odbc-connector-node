@@ -1,4 +1,4 @@
-SCLAB Presto/Trino Connector
+SCLAB ODBC Connector
 ==============================
 
 # Document
