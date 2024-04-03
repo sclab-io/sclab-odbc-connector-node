@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "Stop SCLAB Presto Connector"
-docker compose down
+./node_modules/.bin/pm2 stop 0

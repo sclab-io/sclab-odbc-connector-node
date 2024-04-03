@@ -1,3 +1,4 @@
 #!/bin/bash
 echo "RUN SCLAB Presto Connector"
-docker compose up -d
+npm i
+npm run deploy:prod
