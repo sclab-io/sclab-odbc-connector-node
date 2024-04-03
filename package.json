@@ -1,5 +1,5 @@
 {
-  "name": "sclab-presto-connector",
+  "name": "sclab-odbc-connector-node",
   "version": "0.1.1",
   "description": "TypeScript + Express API Server",
   "author": "",

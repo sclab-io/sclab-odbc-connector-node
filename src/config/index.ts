@@ -23,6 +23,7 @@ export const {
   MQTT_PASSWORD,
   SQL_INJECTION,
   MY_BATIS_FILE_FOLDER,
+  MAX_POOL_SIZE,
 } = process.env;
 
 export interface QueryItem {
@@ -80,6 +81,26 @@ Object.keys(process.env).forEach(function (key) {
   QueryItems.push(queryItem);
 });
 
+// BigInt bug fix to string
+BigInt.prototype['toJSON'] = function () {
+  if (this > Number.MAX_SAFE_INTEGER) {
+    return this.toString();
+  }
+  return parseInt(this.toString(), 10);
+};
+
+const connectionConfig = {
+  connectionString: CONNECTION_STRING,
+  connectionTimeout: 10,
+  loginTimeout: 10,
+  maxSize: parseInt(MAX_POOL_SIZE || '10', 10),
+};
+
+let pool: Pool;
 export async function DBPool(): Promise<Pool> {
-  return await odbc.pool(`${CONNECTION_STRING}`);
+  if (!pool) {
+    pool = await odbc.pool(connectionConfig);
+  }
+
+  return pool;
 }

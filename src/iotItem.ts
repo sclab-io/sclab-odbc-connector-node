@@ -1,4 +1,4 @@
-import { MQTT_TOPIC, PrestoClient, QueryItem } from './config/index';
+import { MQTT_TOPIC, DBPool, QueryItem } from './config/index';
 import mqtt from 'mqtt';
 import { logger } from './utils/logger';
 
@@ -12,54 +12,20 @@ export class IOTItem {
         setTimeout(func, queryItem.interval);
         return;
       }
-      let rows = [];
-      PrestoClient.execute({
-        query: queryItem.query,
-        state: function (error, query_id, stats) {
-          if (error) {
-            return;
-          }
-          logger.debug({ message: 'status changed', id: query_id, stats: stats });
-        },
-        columns: function (error, data) {
-          if (error) {
-            return;
-          }
-          logger.debug(data);
-        },
-        data: function (error, data, columns, stats) {
-          if (error) {
-            return;
-          }
-          logger.debug(data);
-          for (let i = 0; i < data.length; i++) {
-            const obj = {};
-            for (let j = 0; j < columns.length; j++) {
-              obj[columns[j].name] = data[i][j];
-            }
 
-            rows.push(obj);
-          }
-        },
-        success: function (error, stats) {
-          if (error) {
-            return;
-          }
-          logger.debug(stats);
-          const data = JSON.stringify({
-            rows,
-          });
-          client.publish(topic, Buffer.from(data, 'utf-8'));
-          logger.info(`topic: ${topic}, data: ${data}`);
-          rows = null;
-
-          setTimeout(func, queryItem.interval);
-        },
-        error: function (error) {
-          console.error(error);
-          rows = null;
-        },
-      });
+      try {
+        logger.info(`RUN SQL : ${queryItem.query}`);
+        const conn = await DBPool();
+        const result = await conn.query(queryItem.query);
+        const data = JSON.stringify({
+          rows: result,
+        });
+        client.publish(topic, Buffer.from(data, 'utf-8'));
+        logger.info(`topic: ${topic}, data: ${data}`);
+        setTimeout(func, queryItem.interval);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     func();

@@ -66,10 +66,22 @@ class APIController {
       );
     }
 
-    logger.info(`RUN SQL : ${sql}`);
-    const conn = await DBPool();
-    const result = await conn.query(sql);
-    console.log(result);
+    try {
+      logger.info(`RUN SQL : ${sql}`);
+      const conn = await DBPool();
+      const result = await conn.query(sql);
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+      });
+      res.end(
+        JSON.stringify({
+          rows: result,
+        }),
+      );
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
   };
 }
 
