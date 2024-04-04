@@ -90,7 +90,7 @@ class App {
   public async checkConnectionInformation() {
     // check connection
     try {
-      const conn = await DBPool();
+      await DBPool();
       logger.info('DB Connection success');
     } catch (e) {
       console.error(e);
@@ -118,7 +118,7 @@ class App {
   public createAPIRoutes(routes: Routes[]) {
     logger.info('Create API Routes');
 
-    for (let i: number = 0; i < QueryItems.length; i++) {
+    for (let i = 0; i < QueryItems.length; i++) {
       const queryItem: QueryItem = QueryItems[i];
       if (queryItem.type === QueryType.API) {
         const route: Routes = new APIRoute(queryItem);
