@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger';
 import { getPlaceHolders, hasSql, replaceString } from '@/utils/util';
 
 class APIController {
-  mappingRequestData(query: string, queryData: any, isCheckInjection: boolean = false): string {
+  mappingRequestData(query: string, queryData: any, isCheckInjection = false): string {
     // data mapping
     const paramKeys = getPlaceHolders(query);
 
@@ -37,7 +37,6 @@ class APIController {
 
   public queryItem?: QueryItem;
   public index = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    let rows = [];
     if (!this.queryItem || !this.queryItem.query) {
       res.writeHead(500, {
         'Content-Type': 'application/json',

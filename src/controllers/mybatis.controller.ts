@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { DBPool, QueryItem, SQL_INJECTION } from '../config/index';
 import { logger } from '@/utils/logger';
-import { getPlaceHolders, hasSql, replaceString } from '@/utils/util';
+import { hasSql } from '@/utils/util';
 import MybatisMapper from 'mybatis-mapper';
 
 class APIController {
   public options: any = { language: 'sql', indent: '  ' };
   public queryItem?: QueryItem;
 
-  mappingRequestData(queryData: any, isCheckInjection: boolean = false): string {
+  mappingRequestData(queryData: any, isCheckInjection = false): string {
     // data mapping
     const valueObj = {};
     const paramKeys = Object.keys(queryData);
@@ -42,7 +42,6 @@ class APIController {
   }
 
   public index = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    let rows = [];
     if (!this.queryItem.namespace || !this.queryItem.queryId) {
       res.writeHead(500, {
         'Content-Type': 'application/json',
